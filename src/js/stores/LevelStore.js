@@ -48,10 +48,19 @@ try {
   console.warn('local storage failed', e);
 }
 
+function encryptMapToURL(map) {
+  // const jsonString = JSON.stringify(map);
+  // const encrypted = CryptoJS.AES.encrypt(jsonString, "YourSecretKey").toString();
+  const encoded = encodeURIComponent(map);
+  window.location.hash = `hash=${encoded}`;
+}
+
+
 function _syncToStorage() {
   try {
     localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
     // var aes = require('js-crypto-aes');
+    var sid = 0;
     // alert(Object.keys(_solvedMap).length);
     // alert(SOLVED_MAP_STORAGE_KEY.length);
     // var sid = prompt("Enter you student id(학번):");
@@ -61,12 +70,23 @@ function _syncToStorage() {
     // alert(encrypted);
     // alert(decrypted);
     // alert(actual_str);
-
-    if (Object.keys(_solvedMap).length >= 18) {
-      alert(Object.keys(_solvedMap).length);
-      var sid = prompt("Enter you student id(학번):");
-      var encrypted = CryptoJS.AES.encrypt(sid, "selab");
-      alert(encrypted);
+    if (Object.keys(_solvedMap).length == 1) {
+      // alert(Object.keys(_solvedMap).length);
+      sid = prompt("Enter you student id(학번):");
+      // var encrypted = CryptoJS.AES.encrypt(sid, "selab");
+      // alert(encrypted);
+      localStorage.setItem("SID", sid);
+    } 
+    // encodeURIComponent(sid)
+    
+    if (Object.keys(_solvedMap).length >= 0) {
+      var id = localStorage.getItem("SID")
+      // alert(Object.keys(_solvedMap).length);
+      // alert(id + Object.keys(_solvedMap));
+      // var sid = prompt("Enter you student id(학번):");
+      var encrypted = CryptoJS.AES.encrypt(id + Object.keys(_solvedMap), "selab");
+      // alert(encrypted);
+      encryptMapToURL(encrypted);
     } else {
       ;
     }
