@@ -56,8 +56,39 @@ function encryptMapToURL(map) {
 }
 
 
+function decryptMapFromURL() {
+  const urlHash = window.location.hash.substr(1);
+  const params = new URLSearchParams(urlHash);
+  const encrypted = params.get("hash");
+  // alert(encrypted);
+  if (!encrypted) return null;
+
+  const decoded = decodeURIComponent(encrypted);
+  const decrypted = CryptoJS.AES.decrypt(decoded, "selab").toString(CryptoJS.enc.Utf8);
+  // var levels_decrypted = decrypted.split("-");
+  var levels_arr = new Array();
+  // levels_arr = decrypted.split(',');
+  // var removed = levels_decrypted.splice(0,1)
+  var removed = decrypted.substring(decrypted.indexOf("-") + 1);
+  // alert(decrypted.split("-").splice(0,1));
+  levels_arr = removed.split(',');
+  // alert(levels_decrypted);
+  var obj = {};
+  for(var i = 0; i < levels_arr.length; i++){
+        _solvedMap[levels_arr[i]] = true;
+        // alert(JSON.stringify(obj));
+        // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(obj));
+        obj = {}
+    }
+  encryptMapToURL(encrypted);
+  // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, obj);
+  // return JSON.parse(decrypted);
+  // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
+}
+
 function _syncToStorage() {
   try {
+    // decryptMapFromURL();
     localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
     // var aes = require('js-crypto-aes');
     var sid = 0;
@@ -78,16 +109,20 @@ function _syncToStorage() {
       localStorage.setItem("SID", sid);
     } 
     // encodeURIComponent(sid)
-    
+
+    // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
+
     if (Object.keys(_solvedMap).length >= 0) {
       var id = localStorage.getItem("SID")
       // alert(Object.keys(_solvedMap).length);
       // alert(id + Object.keys(_solvedMap));
       // var sid = prompt("Enter you student id(학번):");
-      var encrypted = CryptoJS.AES.encrypt(id + Object.keys(_solvedMap), "selab");
+      var encrypted = CryptoJS.AES.encrypt(id + "-"+ Object.keys(_solvedMap), "selab");
       // alert(encrypted);
       encryptMapToURL(encrypted);
+      decryptMapFromURL();
     } else {
+      // decryptMapFromURL();
       ;
     }
   } catch (e) {
@@ -238,13 +273,17 @@ AppConstants.StoreSubscribePrototype,
     switch (action.type) {
       case ActionTypes.RESET_LEVELS_SOLVED:
         _solvedMap = {};
+        decryptMapFromURL();
         _syncToStorage();
         shouldInform = true;
+        
         break;
       case ActionTypes.SET_LEVEL_SOLVED:
         _solvedMap[action.levelID] = true;
+        decryptMapFromURL();
         _syncToStorage();
         shouldInform = true;
+        
         break;
     }
 
