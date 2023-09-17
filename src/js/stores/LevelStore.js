@@ -52,14 +52,24 @@ function _syncToStorage() {
   try {
     localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
     // var aes = require('js-crypto-aes');
-    localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
-    var sid = prompt("Enter you student id(학번):");
-    var encrypted = CryptoJS.AES.encrypt(sid, "Secret Passphrase");
-    var decrypted = CryptoJS.AES.decrypt(encrypted, "Secret Passphrase");
-    var actual_str = decrypted.toString(CryptoJS.enc.Utf8);
-    alert(encrypted);
-    alert(decrypted);
-    alert(actual_str);
+    // alert(Object.keys(_solvedMap).length);
+    // alert(SOLVED_MAP_STORAGE_KEY.length);
+    // var sid = prompt("Enter you student id(학번):");
+    // var encrypted = CryptoJS.AES.encrypt(sid, "Secret Passphrase");
+    // var decrypted = CryptoJS.AES.decrypt(encrypted, "Secret Passphrase");
+    // var actual_str = decrypted.toString(CryptoJS.enc.Utf8);
+    // alert(encrypted);
+    // alert(decrypted);
+    // alert(actual_str);
+
+    if (Object.keys(_solvedMap).length >= 18) {
+      alert(Object.keys(_solvedMap).length);
+      var sid = prompt("Enter you student id(학번):");
+      var encrypted = CryptoJS.AES.encrypt(sid, "selab");
+      alert(encrypted);
+    } else {
+      ;
+    }
   } catch (e) {
     console.warn('local storage failed on set', e);
   }
