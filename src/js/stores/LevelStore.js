@@ -1,5 +1,5 @@
 "use strict";
-
+const CryptoJS = require("crypto-js");
 var AppConstants = require('../constants/AppConstants');
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
@@ -51,6 +51,15 @@ try {
 function _syncToStorage() {
   try {
     localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
+    // var aes = require('js-crypto-aes');
+    localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
+    var sid = prompt("Enter you student id(학번):");
+    var encrypted = CryptoJS.AES.encrypt(sid, "Secret Passphrase");
+    var decrypted = CryptoJS.AES.decrypt(encrypted, "Secret Passphrase");
+    var actual_str = decrypted.toString(CryptoJS.enc.Utf8);
+    alert(encrypted);
+    alert(decrypted);
+    alert(actual_str);
   } catch (e) {
     console.warn('local storage failed on set', e);
   }
