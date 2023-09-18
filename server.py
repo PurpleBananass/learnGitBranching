@@ -1,55 +1,44 @@
-# Run python server on a different thread
-import http.server
-import socketserver
-import sys, os, random, string, signal, subprocess
-import time, random, string
+import time, threading, socket, SocketServer, BaseHTTPServer
 
-# run a subprocess to create server
-def random_string(n=50):
-    return ''.join(random.choice(string.ascii_lowercase+string.digits) for _ in range(n))
+class Handler(BaseHTTPServer.BaseHTTPRequestHandler):
 
-def main():
-    n_arg = len(sys.argv)
-    task = sys.argv[1]
-    
-    if task == "1":
-        run_cp_kill()
-    elif task == "2":
-        run_local_server(port = 8080)
+    def do_GET(self):
+        if self.path != '/':
+            self.send_error(404, "Object not found")
+            return
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.end_headers()
 
-def run_cp_kill():
-    html_page = "./index.html"
+        # serve up an infinite stream
+        i = 0
+        while True:
+            self.wfile.write("%i " % i)
+            time.sleep(0.1)
+            i += 1
 
-    # Run local server
-    random_tag = random_string()
-    tmp_file = html_page.strip(".html") +"_"+ random_tag + ".html"
-    os.system('cp %s %s'%(html_page,tmp_file))
+# Create ONE socket.
+addr = ('', 8080)
+sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sock.bind(addr)
+sock.listen(5)
 
-    # Runs other process in the background
-    p = subprocess.Popen('python custom_server.py 2'.split(" "))
+# Launch 100 listener threads.
+class Thread(threading.Thread):
+    def __init__(self, i):
+        threading.Thread.__init__(self)
+        self.i = i
+        self.daemon = True
+        self.start()
+    def run(self):
+        httpd = BaseHTTPServer.HTTPServer(addr, Handler, False)
 
-    time.sleep(0.5) # wait for server to launch
-    url = "http://localhost:8499/%s"%tmp_file
-    os.system('open %s'%url)
-    time.sleep(0.5)
-    os.system('rm %s'%tmp_file)
+        # Prevent the HTTP server from re-binding every handler.
+        # https://stackoverflow.com/questions/46210672/
+        httpd.socket = sock
+        httpd.server_bind = self.server_close = lambda self: None
 
-    # Now kill serverls
-    kill_local_server(p.pid)
-
-def run_local_server(port = 8000):
-    socketserver.TCPServer.allow_reuse_address = True # required for fast reuse ! 
-    """
-    Check out :
-    https://stackoverflow.com/questions/15260558/python-tcpserver-address-already-in-use-but-i-close-the-server-and-i-use-allow
-    """
-    Handler = http.server.SimpleHTTPRequestHandler
-    httpd = socketserver.TCPServer(("", port), Handler)
-    print("Creating server at port", port)
-    httpd.serve_forever()
-
-def kill_local_server(pid):
-    test = os.kill(pid, signal.SIGTERM) # kills subprocess, allowing clean up/clearing cache
-
-if __name__ == "__main__":
-    main()
+        httpd.serve_forever()
+[Thread(i) for i in range(100)]
+time.sleep(9e9)
