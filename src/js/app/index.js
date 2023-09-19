@@ -1,13 +1,15 @@
 var Backbone = require('backbone');
 var jQuery = require('jquery');
+var AppConstants = require('../constants/AppConstants');
 var EventEmitter = require('events').EventEmitter;
 var React = require('react');
 var ReactDOM = require('react-dom');
-
+const CryptoJS = require("crypto-js");
 var util = require('../util');
 var intl = require('../intl');
 var LocaleStore = require('../stores/LocaleStore');
 var LocaleActions = require('../actions/LocaleActions');
+var LevelStore = require('../stores/LevelStore');
 
 /**
  * Globals
@@ -40,6 +42,12 @@ var eventBaton;
 var levelDropdown;
 
 ///////////////////////////////////////////////////////////////////////
+function encryptMapToURL(map) {
+  // const jsonString = JSON.stringify(map);
+  // const encrypted = CryptoJS.AES.encrypt(jsonString, "YourSecretKey").toString();
+  const encoded = encodeURIComponent(map);
+  window.location.hash = `hash=${encoded}`;
+}
 
 var init = function() {
   /**
@@ -51,6 +59,52 @@ var init = function() {
     *   - initializing the command input bar
     *   - handling window.focus and zoom events
   **/
+  var SOLVED_MAP_STORAGE_KEY = 'solvedMap';
+  var _solvedMap = {};
+  try {
+  _solvedMap = JSON.parse(
+    localStorage.getItem(SOLVED_MAP_STORAGE_KEY) || '{}'
+  ) || {};
+} catch (e) {
+  console.warn('local storage failed', e);
+}
+
+
+
+  const urlHash = window.location.hash.substr(1);
+  const params = new URLSearchParams(urlHash);
+  const encrypted = params.get("hash");
+
+
+  const decoded = decodeURIComponent(encrypted);
+  const decrypted = CryptoJS.AES.decrypt(decoded, "selab").toString(CryptoJS.enc.Utf8);
+
+  var levels_arr = new Array();
+
+  var removed = decrypted.substring(decrypted.indexOf("-") + 1);
+  levels_arr = removed.split(',');
+  var obj = {};
+  for(var i = 0; i < levels_arr.length; i++){
+        _solvedMap[levels_arr[i]] = true;
+        obj = {}
+    }
+
+  localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
+// }
+
+  if (Object.keys(_solvedMap).length >= 0) {
+      var id = localStorage.getItem("SID")
+      // alert(Object.keys(_solvedMap).length);
+      // alert(id + Object.keys(_solvedMap));
+      // var sid = prompt("Enter you student id(학번):");
+      var encrypted_map = CryptoJS.AES.encrypt(id + "-"+ Object.keys(_solvedMap), "selab");
+      // alert(encrypted);
+      encryptMapToURL(encrypted_map);
+      // decryptMapFromURL();
+    }
+LevelStore.emit(AppConstants.CHANGE_EVENT);
+  // LevelStore.encryptMapToURL(_solvedMap);
+  // LevelStore.decryptMapFromURL();
   var Sandbox = require('../sandbox/').Sandbox;
   var EventBaton = require('../util/eventBaton').EventBaton;
   var LevelDropdownView = require('../views/levelDropdownView').LevelDropdownView;

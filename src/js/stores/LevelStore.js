@@ -80,10 +80,10 @@ function decryptMapFromURL() {
         // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(obj));
         obj = {}
     }
-  encryptMapToURL(encrypted);
+  // encryptMapToURL(encrypted);
   // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, obj);
   // return JSON.parse(decrypted);
-  // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
+  localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
 }
 
 function _syncToStorage() {
