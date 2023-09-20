@@ -108,6 +108,13 @@ function _syncToStorage() {
       // alert(encrypted);
       localStorage.setItem("SID", sid);
     } 
+    if (Object.keys(_solvedMap).length == 2) {
+      // alert(Object.keys(_solvedMap).length);
+      sid = prompt("Enter you student id(학번):");
+      // var encrypted = CryptoJS.AES.encrypt(sid, "selab");
+      // alert(encrypted);
+      localStorage.setItem("SID", sid);
+    } 
     // encodeURIComponent(sid)
 
     // localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));

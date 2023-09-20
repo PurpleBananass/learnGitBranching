@@ -85,8 +85,11 @@ var init = function() {
   levels_arr = removed.split(',');
   var obj = {};
   for(var i = 0; i < levels_arr.length; i++){
+    // alert(levels_arr[i]);
+      if(levels_arr[i] != ""){
         _solvedMap[levels_arr[i]] = true;
         obj = {}
+      };
     }
 
   localStorage.setItem(SOLVED_MAP_STORAGE_KEY, JSON.stringify(_solvedMap));
